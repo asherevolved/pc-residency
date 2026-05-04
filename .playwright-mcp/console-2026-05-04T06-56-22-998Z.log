@@ -1,0 +1,4 @@
+[    2894ms] [WARNING] GSAP target .gsap-reveal not found. https://gsap.com @ http://localhost:3008/_next/static/chunks/08zj0l.jm4-2c.js:10
+[    2895ms] [WARNING] GSAP target .ambient-thread not found. https://gsap.com @ http://localhost:3008/_next/static/chunks/08zj0l.jm4-2c.js:10
+[    2906ms] [WARNING] GSAP target .footer-glow not found. https://gsap.com @ http://localhost:3008/_next/static/chunks/08zj0l.jm4-2c.js:10
+[    2910ms] [WARNING] Element not found: footer @ http://localhost:3008/_next/static/chunks/08zj0l.jm4-2c.js:10

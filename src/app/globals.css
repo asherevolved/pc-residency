@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
-
 @import "tailwindcss";
 
 @theme {
@@ -14,9 +12,9 @@
   --color-accent-light: #A83244;
   --color-accent-dark: #6D1A28;
 
-  --font-serif: 'Libre Caslon Text', Georgia, serif;
-  --font-sans: 'Lato', system-ui, sans-serif;
-  --font-display: 'Libre Caslon Display', Georgia, serif;
+  --font-serif: var(--font-bodoni), Georgia, serif;
+  --font-sans: var(--font-sora), system-ui, sans-serif;
+  --font-display: var(--font-bodoni), Georgia, serif;
 }
 
 html {
@@ -45,13 +43,28 @@ html.lenis, html.lenis body {
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-cream);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(139, 34, 50, 0.08), transparent 28rem),
+    radial-gradient(circle at 82% 36%, rgba(26, 26, 26, 0.06), transparent 30rem),
+    linear-gradient(135deg, #fbfaf7 0%, #f4efe8 48%, #fffdf9 100%);
   color: var(--color-charcoal);
   overflow-x: hidden;
-  font-weight: 400;
-  line-height: 1.7;
+  font-weight: 500;
+  line-height: 1.68;
+  letter-spacing: 0.005em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 ::selection {
@@ -80,15 +93,101 @@ img {
   transition: opacity 0.3s ease;
 }
 
+.site-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -2;
+  background-image:
+    linear-gradient(rgba(26, 26, 26, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26, 26, 26, 0.035) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 16%, black 82%, transparent 100%);
+}
+
+
+
+
+.ambient-thread {
+  position: absolute;
+  inset: 9% auto auto -7rem;
+  width: 16rem;
+  height: 70%;
+  pointer-events: none;
+  border-right: 1px solid rgba(139, 34, 50, 0.18);
+  border-radius: 999px;
+}
+
+.section-panel {
+  position: relative;
+  border: 1px solid rgba(232, 228, 222, 0.9);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.74), rgba(250, 248, 245, 0.92)),
+    radial-gradient(circle at 10% 0%, rgba(139, 34, 50, 0.08), transparent 22rem);
+  box-shadow: 0 28px 80px -48px rgba(26, 26, 26, 0.42);
+}
+
+.accent-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139, 34, 50, 0.6), transparent);
+}
+
+.amenity-card .amenity-fill {
+  width: 4px;
+  transition: width 500ms ease;
+}
+
+.amenity-card:hover .amenity-fill,
+.amenity-card:focus-within .amenity-fill {
+  width: 100%;
+}
+
+.amenity-card:hover .amenity-copy,
+.amenity-card:hover .amenity-icon,
+.amenity-card:focus-within .amenity-copy,
+.amenity-card:focus-within .amenity-icon {
+  color: var(--color-cream);
+}
+
+.amenity-card:hover .amenity-muted,
+.amenity-card:focus-within .amenity-muted {
+  color: rgba(250, 248, 245, 0.72);
+}
+
 .eyebrow {
   font-family: var(--font-sans);
   font-size: 11px;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--color-warm-gray);
 }
 
 .hairline {
   background-color: var(--color-hairline);
+}
+
+/* ── Marquee (pill bar) ── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ── Reviews card marquee ── */
+@keyframes reviews-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.animate-reviews-marquee {
+  animation: reviews-marquee 22s linear infinite;
 }

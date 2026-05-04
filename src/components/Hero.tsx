@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
@@ -9,14 +9,44 @@ import { Calendar, Users, BedDouble, ArrowRight, ChevronDown } from "lucide-reac
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* ── Slideshow images ── */
+const slides = [
+  {
+    src: "/images/real/hero.jpg",
+    alt: "Hotel PC Residency – Building Exterior Day",
+  },
+  {
+    src: "/images/real/exterior-night.jpg",
+    alt: "Hotel PC Residency – Night View with Neon Sign",
+  },
+  {
+    src: "/images/real/room-double.jpg",
+    alt: "Deluxe A/C Room – White & Red Bedding",
+  },
+  {
+    src: "/images/real/room-twin.jpg",
+    alt: "Elite Room – Gold & Brown Bedding",
+  },
+  {
+    src: "/images/real/entrance.jpg",
+    alt: "Hotel PC Residency – Entrance & Reception",
+  },
+];
+
+const SLIDE_DURATION = 5000; // ms per slide
+
 export default function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const today = new Date().toISOString().split("T")[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const todayDate = new Date();
+  const tomorrowDate = new Date(todayDate);
+  tomorrowDate.setDate(todayDate.getDate() + 1);
+  const today = todayDate.toISOString().split("T")[0];
+  const tomorrow = tomorrowDate.toISOString().split("T")[0];
 
   const [checkIn, setCheckIn] = useState(today);
   const [checkOut, setCheckOut] = useState(tomorrow);
@@ -28,20 +58,19 @@ export default function Hero() {
     document.getElementById("rooms")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  /* ── Auto-advance slideshow ── */
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(nextSlide, SLIDE_DURATION);
+    return () => clearInterval(timer);
+  }, [nextSlide]);
+
+  /* ── GSAP scroll effects ── */
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Parallax on the background image
-      gsap.to(imageRef.current, {
-        yPercent: 20,
-        ease: "none",
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-        },
-      });
-
       // Fade content out on scroll
       gsap.to(contentRef.current, {
         opacity: 0,
@@ -77,18 +106,27 @@ export default function Hero() {
       ref={heroRef}
       className="relative h-screen min-h-[750px] overflow-hidden"
     >
-      {/* ── Full-bleed background image ── */}
-      <div ref={imageRef} className="absolute inset-0 scale-110">
-        <Image
-          src="/images/real/hero.jpg"
-          alt="Hotel PC Residency Mysuru - Building Exterior"
-          fill
-          priority
-          quality={90}
-          className="object-cover"
-          sizes="100vw"
-        />
-      </div>
+      {/* ── Slideshow background ── */}
+      <AnimatePresence mode="popLayout">
+        <motion.div
+          key={currentSlide}
+          initial={{ opacity: 0, scale: 1.08 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute inset-0"
+        >
+          <Image
+            src={slides[currentSlide].src}
+            alt={slides[currentSlide].alt}
+            fill
+            priority={currentSlide === 0}
+            quality={90}
+            className="object-cover"
+            sizes="100vw"
+          />
+        </motion.div>
+      </AnimatePresence>
 
       {/* ── Gradient overlay ── */}
       <div
@@ -97,8 +135,27 @@ export default function Hero() {
         style={{ opacity: 0.55 }}
       />
 
-      {/* ── Subtle noise texture ── */}
+      {/* ── Subtle noise ── */}
       <div className="absolute inset-0 noise-overlay pointer-events-none" />
+
+      {/* ── Slide indicators ── */}
+      <div className="absolute bottom-36 lg:bottom-44 left-6 lg:left-12 z-20 flex items-center gap-2">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentSlide(i)}
+            className={`transition-all duration-500 rounded-full cursor-pointer ${
+              i === currentSlide
+                ? "w-8 h-2 bg-white"
+                : "w-2 h-2 bg-white/40 hover:bg-white/60"
+            }`}
+            aria-label={`Go to slide ${i + 1}`}
+          />
+        ))}
+        <span className="ml-3 text-white/40 text-[10px] tracking-[0.2em] uppercase font-sans">
+          {String(currentSlide + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
+        </span>
+      </div>
 
       {/* ── Content ── */}
       <div
@@ -113,7 +170,7 @@ export default function Hero() {
           className="flex items-center gap-3 mb-5"
         >
           <div className="w-8 h-[1px] bg-gold" />
-          <span className="text-gold text-[11px] tracking-[0.28em] uppercase font-medium font-sans">
+          <span className="text-gold text-[11px] tracking-[0.18em] uppercase font-medium font-sans">
             3-Star Hotel · Mysuru, Karnataka
           </span>
         </motion.div>
@@ -123,7 +180,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display text-[42px] sm:text-[60px] lg:text-[80px] leading-[1.05] tracking-[-0.01em] text-white max-w-4xl"
+          className="font-display text-[42px] sm:text-[60px] lg:text-[80px] leading-[1.05] tracking-normal text-white max-w-4xl"
         >
           Where quality
           <br />
@@ -140,8 +197,8 @@ export default function Hero() {
         >
           {[
             { v: "50+", l: "Rooms" },
-            { v: "348", l: "Google Reviews" },
-            { v: "3.9★", l: "Rating" },
+            { v: "403", l: "Reviews" },
+            { v: "3.9★", l: "Google Rating" },
           ].map((s, i) => (
             <div key={s.l} className="flex items-center gap-3">
               {i > 0 && <div className="w-[1px] h-8 bg-white/20" />}
@@ -149,7 +206,7 @@ export default function Hero() {
                 <span className="text-white text-2xl lg:text-3xl font-serif font-light leading-none">
                   {s.v}
                 </span>
-                <span className="block text-white/50 text-[11px] tracking-[0.28em] uppercase mt-1 font-sans">
+                <span className="block text-white/50 text-[11px] tracking-[0.18em] uppercase mt-1 font-sans">
                   {s.l}
                 </span>
               </div>
@@ -170,7 +227,7 @@ export default function Hero() {
           <label className="flex-1 flex items-center gap-3 px-5 py-3.5 rounded-xl hover:bg-cream/70 transition-colors cursor-pointer">
             <Calendar size={18} strokeWidth={1.5} className="text-charcoal/60 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] tracking-[0.28em] uppercase text-warm-gray font-sans font-medium">
+              <div className="text-[11px] tracking-[0.18em] uppercase text-warm-gray font-sans font-medium">
                 Check in
               </div>
               <input
@@ -189,7 +246,7 @@ export default function Hero() {
           <label className="flex-1 flex items-center gap-3 px-5 py-3.5 rounded-xl hover:bg-cream/70 transition-colors cursor-pointer">
             <Calendar size={18} strokeWidth={1.5} className="text-charcoal/60 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] tracking-[0.28em] uppercase text-warm-gray font-sans font-medium">
+              <div className="text-[11px] tracking-[0.18em] uppercase text-warm-gray font-sans font-medium">
                 Check out
               </div>
               <input
@@ -208,7 +265,7 @@ export default function Hero() {
           <label className="flex-1 flex items-center gap-3 px-5 py-3.5 rounded-xl hover:bg-cream/70 transition-colors cursor-pointer">
             <Users size={18} strokeWidth={1.5} className="text-charcoal/60 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] tracking-[0.28em] uppercase text-warm-gray font-sans font-medium">
+              <div className="text-[11px] tracking-[0.18em] uppercase text-warm-gray font-sans font-medium">
                 Guests
               </div>
               <select
@@ -231,7 +288,7 @@ export default function Hero() {
           <label className="flex-1 flex items-center gap-3 px-5 py-3.5 rounded-xl hover:bg-cream/70 transition-colors cursor-pointer">
             <BedDouble size={18} strokeWidth={1.5} className="text-charcoal/60 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] tracking-[0.28em] uppercase text-warm-gray font-sans font-medium">
+              <div className="text-[11px] tracking-[0.18em] uppercase text-warm-gray font-sans font-medium">
                 Room
               </div>
               <select
@@ -268,7 +325,7 @@ export default function Hero() {
         transition={{ delay: 1.3 }}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-white/40 hover:text-white/70 transition-colors cursor-pointer"
       >
-        <span className="text-[11px] tracking-[0.28em] uppercase font-sans">Scroll</span>
+        <span className="text-[11px] tracking-[0.18em] uppercase font-sans">Scroll</span>
         <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
           <ChevronDown size={16} />
         </motion.div>

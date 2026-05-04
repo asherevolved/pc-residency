@@ -24,7 +24,15 @@ export default function Navbar() {
 
   const navTo = (href: string) => {
     setIsOpen(false);
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+    const el = document.querySelector(href) as HTMLElement | null;
+    if (!el) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const lenis = (window as any).__lenis;
+    if (lenis) {
+      lenis.scrollTo(el, { offset: -80, duration: 1.4 });
+    } else {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
@@ -43,7 +51,7 @@ export default function Navbar() {
                 e.preventDefault();
                 navTo("#home");
               }}
-              className="font-serif text-2xl tracking-tight text-charcoal"
+              className="font-serif text-2xl tracking-normal text-charcoal"
             >
               PC Residency<span className="text-accent">.</span>
             </a>

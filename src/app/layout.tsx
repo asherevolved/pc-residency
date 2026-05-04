@@ -1,5 +1,20 @@
 import type { Metadata } from "next";
+import { Bodoni_Moda, Sora } from "next/font/google";
 import "./globals.css";
+
+const bodoni = Bodoni_Moda({
+  subsets: ["latin"],
+  variable: "--font-bodoni",
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-sora",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Hotel PC Residency | 3-Star Hotel in Mysuru - Where Quality Meets Value",
@@ -27,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${bodoni.variable} ${sora.variable}`}>
       <body className="antialiased">
         {children}
       </body>

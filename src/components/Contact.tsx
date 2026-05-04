@@ -2,259 +2,295 @@
 
 import { useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { MapPin, Phone, Mail, Clock, Plus } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from "lucide-react";
 
-const faqs = [
+
+
+const infoItems = [
   {
-    q: "Is there a restaurant on-site?",
-    a: "Yes — a multi-cuisine restaurant, rooftop dining, and an air-conditioned dining hall.",
+    icon: MapPin,
+    title: "Address",
+    lines: [
+      "233, 234, High Tension Double Rd, Lokanayaka Nagar,",
+      "Vijay Nagar 2nd Stage, Mysuru, Karnataka 570017",
+    ],
   },
   {
-    q: "Do you offer parking?",
-    a: "Complimentary car parking is available for all guests within the premises.",
+    icon: Phone,
+    title: "Phone",
+    lines: ["+91 95388 85988", "+91 98457 60545"],
   },
   {
-    q: "What is the check-in / check-out time?",
-    a: "Check-in is 12:00 PM and check-out is 11:00 AM. Early/late options available subject to availability.",
+    icon: Mail,
+    title: "Email",
+    lines: ["hotelpcresidency@gmail.com"],
   },
   {
-    q: "Is the hotel family-friendly?",
-    a: "Yes. Spacious rooms, child-friendly amenities, and 24/7 security make us suitable for families.",
-  },
-  {
-    q: "What are the nearby attractions?",
-    a: "Mysuru Palace (3.2 km), Chamundi Hill (8.5 km), Brindavan Gardens (19 km), and Mysuru Zoo nearby.",
+    icon: Clock,
+    title: "Front Desk",
+    lines: ["24/7 — 365 days"],
   },
 ];
 
-const attractions = [
-  { name: "Mysuru Palace", distance: "3.2 km" },
-  { name: "Chamundi Hill", distance: "8.5 km" },
-  { name: "Brindavan Gardens", distance: "19 km" },
-  { name: "Mysuru Zoo", distance: "5 km" },
-  { name: "Railway Station", distance: "2 km" },
-  { name: "Bus Stand", distance: "1 km" },
-  { name: "Airport", distance: "12 km" },
-];
+/* ─── Floating-label field wrapper ─── */
+function FloatingField({
+  label,
+  id,
+  children,
+  delay = 0,
+  inView,
+}: {
+  label: string;
+  id: string;
+  children: React.ReactNode;
+  delay?: number;
+  inView: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+      className="relative group"
+    >
+      <label
+        htmlFor={id}
+        className="block text-[10.5px] tracking-[0.2em] uppercase font-sans font-semibold text-warm-gray mb-2.5 transition-colors group-focus-within:text-accent"
+      >
+        {label}
+      </label>
+      {children}
+      {/* accent underline that grows on focus */}
+      <span
+        className="absolute bottom-0 left-0 h-[1.5px] w-0 bg-accent transition-all duration-500 group-focus-within:w-full rounded-full"
+        aria-hidden
+      />
+    </motion.div>
+  );
+}
 
 export default function Contact() {
   const ref = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [sent, setSent] = useState(false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Thank you — we'll be in touch shortly.");
-    setForm({ name: "", email: "", message: "" });
+    setSent(true);
+    setTimeout(() => {
+      setSent(false);
+      setForm({ name: "", email: "", phone: "", message: "" });
+    }, 3500);
   };
 
+  const inputCls =
+    "w-full px-4 py-3.5 rounded-xl bg-white/60 border border-hairline text-charcoal text-[14.5px] font-sans outline-none placeholder-warm-gray/50 transition-all duration-300 focus:bg-white focus:border-accent/40 focus:shadow-[0_0_0_3px_rgba(139,34,50,0.09)] backdrop-blur-sm";
+
   return (
-    <section id="contact" ref={ref} className="py-24 lg:py-40">
+    <section id="contact" ref={ref} className="relative py-24 lg:py-40">
+      {/* decorative orb */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-24 right-0 w-[500px] h-[500px] rounded-full opacity-[0.07]"
+        style={{
+          background:
+            "radial-gradient(circle at center, #8B2232 0%, transparent 70%)",
+          filter: "blur(40px)",
+        }}
+      />
+
       <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
+        {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          className="max-w-2xl mb-16"
+          className="gsap-reveal max-w-2xl mb-16"
         >
           <span className="eyebrow">— Contact</span>
           <h2 className="mt-5 font-serif text-4xl md:text-5xl lg:text-6xl leading-tight tracking-normal text-charcoal">
             Get in <span className="italic text-accent">touch</span>.
           </h2>
+          <p className="mt-4 text-[15px] text-warm-gray leading-[1.8] max-w-lg">
+            Whether you have a query, want to make a reservation, or simply wish
+            to learn more — we&apos;re here around the clock.
+          </p>
         </motion.div>
 
-        {/* Contact grid */}
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16">
-          {/* Form */}
-          <div className="lg:col-span-7">
-            <form onSubmit={submit} className="space-y-6">
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-[11px] tracking-[0.28em] uppercase text-warm-gray font-sans font-medium mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
-                    className="w-full py-3 bg-transparent border-b border-hairline text-charcoal text-[15px] outline-none focus:border-charcoal transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] tracking-[0.28em] uppercase text-warm-gray font-sans font-medium mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={form.email}
-                    onChange={(e) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
-                    className="w-full py-3 bg-transparent border-b border-hairline text-charcoal text-[15px] outline-none focus:border-charcoal transition-colors"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] tracking-[0.2em] uppercase text-warm-gray mb-2">
-                  Message
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  value={form.message}
-                  onChange={(e) =>
-                    setForm({ ...form, message: e.target.value })
-                  }
-                  className="w-full py-3 bg-transparent border-b border-hairline text-charcoal text-[15px] outline-none focus:border-charcoal transition-colors resize-none"
-                />
-              </div>
-              <button
-                type="submit"
-                className="mt-4 px-8 py-4 bg-charcoal text-cream rounded-full text-[12px] tracking-[0.18em] uppercase font-medium font-sans hover:bg-accent transition-colors"
-              >
-                Send Message
-              </button>
-            </form>
+        {/* ── Contact Grid Panel ── */}
+        <div className="section-panel rounded-[28px] overflow-hidden grid lg:grid-cols-12">
+          {/* ── Form Column ── */}
+          <div className="lg:col-span-7 p-8 md:p-10 lg:p-12">
+            <AnimatePresence mode="wait">
+              {sent ? (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex flex-col items-center justify-center h-full min-h-[320px] text-center gap-5"
+                >
+                  <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center">
+                    <CheckCircle2 size={32} className="text-accent" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <p className="font-serif text-2xl text-charcoal mb-2">Message received!</p>
+                    <p className="text-[14px] text-warm-gray">
+                      We&apos;ll be in touch within 24 hours.
+                    </p>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.form
+                  key="form"
+                  ref={formRef}
+                  onSubmit={submit}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-7"
+                >
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <FloatingField label="Full Name" id="contact-name" delay={0.1} inView={inView}>
+                      <input
+                        id="contact-name"
+                        type="text"
+                        required
+                        placeholder="Your name"
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        className={inputCls}
+                      />
+                    </FloatingField>
+
+                    <FloatingField label="Email Address" id="contact-email" delay={0.17} inView={inView}>
+                      <input
+                        id="contact-email"
+                        type="email"
+                        required
+                        placeholder="you@email.com"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        className={inputCls}
+                      />
+                    </FloatingField>
+                  </div>
+
+                  <FloatingField label="Phone (optional)" id="contact-phone" delay={0.24} inView={inView}>
+                    <input
+                      id="contact-phone"
+                      type="tel"
+                      placeholder="+91 XXXXX XXXXX"
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      className={inputCls}
+                    />
+                  </FloatingField>
+
+                  <FloatingField label="Message" id="contact-message" delay={0.31} inView={inView}>
+                    <textarea
+                      id="contact-message"
+                      required
+                      rows={5}
+                      placeholder="Tell us how we can help…"
+                      value={form.message}
+                      onChange={(e) => setForm({ ...form, message: e.target.value })}
+                      className={`${inputCls} resize-none`}
+                    />
+                  </FloatingField>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={inView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                  >
+                    <button
+                      type="submit"
+                      className="group inline-flex items-center gap-3 px-8 py-4 bg-charcoal text-cream rounded-full text-[11.5px] tracking-[0.2em] uppercase font-sans font-semibold hover:bg-accent transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_-12px_rgba(139,34,50,0.5)]"
+                    >
+                      Send Message
+                      <Send
+                        size={14}
+                        strokeWidth={1.8}
+                        className="transition-transform duration-300 group-hover:translate-x-1"
+                      />
+                    </button>
+                  </motion.div>
+                </motion.form>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* Info */}
-          <div className="lg:col-span-5 space-y-6">
-            {[
-              {
-                icon: MapPin,
-                title: "Address",
-                lines: [
-                  "233, 234, High Tension Double Rd, Lokanayaka Nagar,",
-                  "Vijay Nagar 2nd Stage, Mysuru, Karnataka 570017",
-                ],
-              },
-              {
-                icon: Phone,
-                title: "Phone",
-                lines: ["+91 95388 85988", "+91 98457 60545"],
-              },
-              {
-                icon: Mail,
-                title: "Email",
-                lines: ["hotelpcresidency@gmail.com"],
-              },
-              {
-                icon: Clock,
-                title: "Front Desk",
-                lines: ["24/7 — 365 days"],
-              },
-            ].map((item) => {
+          {/* ── Info Column ── */}
+          <div className="lg:col-span-5 relative bg-charcoal/[0.03] border-l border-hairline p-8 md:p-10 lg:p-12 flex flex-col gap-8">
+            {/* subtle accent strip on the left edge */}
+            <span
+              aria-hidden
+              className="absolute left-0 top-8 bottom-8 w-[2px] rounded-full"
+              style={{
+                background:
+                  "linear-gradient(to bottom, transparent, rgba(139,34,50,0.6), transparent)",
+              }}
+            />
+
+            {infoItems.map((item, i) => {
               const Icon = item.icon;
               return (
-                <div
+                <motion.div
                   key={item.title}
-                  className="flex gap-5 pb-6 border-b border-hairline last:border-b-0"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={inView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.55, delay: 0.15 + i * 0.09, ease: [0.22, 1, 0.36, 1] }}
+                  className="group flex gap-4"
                 >
-                  <Icon
-                    size={18}
-                    strokeWidth={1.5}
-                    className="text-charcoal flex-shrink-0 mt-1"
-                  />
-                  <div>
-                    <div className="text-[11px] tracking-[0.28em] uppercase text-warm-gray font-sans font-medium mb-1.5">
+                  {/* icon pill */}
+                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-white border border-hairline flex items-center justify-center shadow-sm transition-all duration-300 group-hover:border-accent/30 group-hover:shadow-[0_4px_20px_-6px_rgba(139,34,50,0.25)]">
+                    <Icon size={16} strokeWidth={1.6} className="text-charcoal group-hover:text-accent transition-colors" />
+                  </div>
+                  <div className="pt-1">
+                    <div className="text-[10px] tracking-[0.22em] uppercase font-sans font-bold text-warm-gray mb-1.5">
                       {item.title}
                     </div>
                     {item.lines.map((l) => (
-                      <div key={l} className="text-[14px] text-charcoal">
+                      <div key={l} className="text-[13.5px] text-charcoal leading-[1.65]">
                         {l}
                       </div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
+
+            {/* Tagline footer */}
+            <div className="mt-auto pt-8 border-t border-hairline">
+              <p className="text-[12px] text-warm-gray leading-[1.75] italic font-serif">
+                &ldquo;Where every stay feels like home — refined hospitality in
+                the heart of Mysuru.&rdquo;
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Map */}
-        <div className="mt-20 aspect-[21/9] rounded-2xl overflow-hidden border border-hairline">
+        {/* Street View */}
+        <div className="gsap-reveal mt-20 aspect-[21/9] rounded-2xl overflow-hidden border border-hairline shadow-[0_30px_90px_-55px_rgba(26,26,26,0.55)]">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3898.2!2d76.6249!3d12.3133!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3baf703c3a7b6e1d%3A0x7d4a8a84c5e8b3e1!2sHotel%20PC%20Residency!5e0!3m2!1sen!2sin!4v1"
+            src="https://www.google.com/maps/embed?pb=!4v1714989600000!6m8!1m7!1sZ1Hwr2buAi-0be8to8dVwQ!2m2!1d76.61532!2d12.33875!3f54.76!4f-11.46!5f0.7820865974627469"
             width="100%"
             height="100%"
-            style={{ border: 0, filter: "grayscale(1) contrast(1.05)" }}
+            style={{ border: 0 }}
             loading="lazy"
+            allowFullScreen
             referrerPolicy="no-referrer-when-downgrade"
-            title="PC Residency Location"
+            title="Hotel PC Residency — Street View"
           />
         </div>
 
-        {/* FAQ + Attractions */}
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mt-24 lg:mt-32">
-          <div className="lg:col-span-7">
-            <span className="eyebrow">— FAQ</span>
-            <h3 className="mt-5 mb-10 font-serif text-3xl lg:text-5xl leading-tight tracking-normal text-charcoal">
-              Common <span className="italic text-accent">questions</span>.
-            </h3>
-            <div className="border-t border-hairline">
-              {faqs.map((f, i) => (
-                <div key={f.q} className="border-b border-hairline">
-                  <button
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between py-5 text-left group"
-                  >
-                    <span className="text-[15px] text-charcoal pr-6">
-                      {f.q}
-                    </span>
-                    <motion.div
-                      animate={{ rotate: openFaq === i ? 45 : 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex-shrink-0 text-warm-gray group-hover:text-charcoal transition-colors"
-                    >
-                      <Plus size={18} strokeWidth={1.5} />
-                    </motion.div>
-                  </button>
-                  <AnimatePresence>
-                    {openFaq === i && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
-                      >
-                        <p className="pb-5 text-[14px] text-warm-gray leading-[1.7] max-w-2xl">
-                          {f.a}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="lg:col-span-5">
-            <span className="eyebrow">— Nearby</span>
-            <h3 className="mt-5 mb-10 font-serif text-3xl lg:text-5xl leading-tight tracking-normal text-charcoal">
-              Around the <span className="italic text-accent">corner</span>.
-            </h3>
-            <div className="border-t border-hairline">
-              {attractions.map((a) => (
-                <div
-                  key={a.name}
-                  className="flex items-center justify-between py-4 border-b border-hairline"
-                >
-                  <span className="text-[14px] text-charcoal">{a.name}</span>
-                  <span className="text-[12px] text-warm-gray tabular-nums">
-                    {a.distance}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
 }
+
