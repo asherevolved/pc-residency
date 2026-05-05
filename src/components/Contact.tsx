@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { notifyContact } from "@/lib/notifications";
 
 const infoItems = [
   {
@@ -80,6 +81,13 @@ export default function Contact() {
     e.preventDefault();
     try {
       await supabase.from("contacts").insert({
+        name: form.name,
+        email: form.email,
+        phone: form.phone || null,
+        message: form.message,
+      });
+      // Send email notification to admin (fire-and-forget)
+      notifyContact({
         name: form.name,
         email: form.email,
         phone: form.phone || null,

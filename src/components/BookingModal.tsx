@@ -7,6 +7,7 @@ import {
   CheckCircle2, Lock, ArrowRight, Loader2
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { notifyBooking } from "@/lib/notifications";
 
 interface RoomData {
   id: string;
@@ -97,6 +98,18 @@ export default function BookingModal({ room, onClose }: BookingModalProps) {
 
     setBookingId(data?.id?.slice(0, 8).toUpperCase() || paymentId);
     setStep("confirmed");
+
+    // Send email notifications (fire-and-forget)
+    notifyBooking({
+      guest_name: guest.name.trim(),
+      guest_email: guest.email.trim(),
+      room_name: room.name,
+      check_in: guest.checkIn,
+      check_out: guest.checkOut,
+      total_amount: total,
+      booking_id: data?.id || paymentId,
+      guests: guest.guests,
+    });
   };
 
   const formatCardNumber = (val: string) => {
