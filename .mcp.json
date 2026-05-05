@@ -5,6 +5,9 @@
       "args": [
         "@playwright/mcp@latest"
       ]
+    },
+    "supabase": {
+      "serverUrl": "https://mcp.supabase.com/mcp?project_ref=bozbzatnmqfjbcxnkkxp&features=branching%2Cfunctions%2Cdocs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cstorage"
     }
   }
 }

@@ -3,8 +3,7 @@
 import { useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from "lucide-react";
-
-
+import { supabase } from "@/lib/supabase";
 
 const infoItems = [
   {
@@ -77,8 +76,18 @@ export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [sent, setSent] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      await supabase.from("contacts").insert({
+        name: form.name,
+        email: form.email,
+        phone: form.phone || null,
+        message: form.message,
+      });
+    } catch {
+      // silently proceed — message still shows success UI
+    }
     setSent(true);
     setTimeout(() => {
       setSent(false);
